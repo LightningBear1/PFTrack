@@ -1,11 +1,13 @@
 /*
+  lalala
+  
   Perform single object tracking with particle filtering
 
   @author Rob Hess
   @version 1.0.0-20060306
 */
 /************************************************************************/
-/* ¸ü¶àÔ´Âë£¬»¶Ó­·ÃÎÊhttp://www.cnblogs.com/yangyangcv                                                                     */
+/* æ›´å¤šæºç ï¼Œæ¬¢è¿è®¿é—®http://www.cnblogs.com/yangyangcv                                                                     */
 /************************************************************************/
 #include "defs.h"
 #include "utils.h"
@@ -29,13 +31,13 @@ unsigned long total_time = 0;
 
 int main( int argc, char** argv )
 {
-    gsl_rng* rng; //ÉùÃ÷gslËæ»úÊıÉú³ÉÆ÷
+    gsl_rng* rng; //å£°æ˜gsléšæœºæ•°ç”Ÿæˆå™¨
     IplImage* frame, * hsv_frame, * frames[MAX_FRAMES], *frmforp[6];
-    IplImage** hsv_ref_imgs;  //hsvÍ¼
-    histogram** ref_histos;  //Ö±·½Í¼
+    IplImage** hsv_ref_imgs;  //hsvå›¾
+    histogram** ref_histos;  //ç›´æ–¹å›¾
     CvCapture* video;
     particle** particles, ** new_particles;
-    CvScalar color;  //CvScalar¾ÍÊÇÒ»¸ö¿ÉÒÔÓÃÀ´´æ·Å4¸ödoubleÊıÖµµÄÊı×é,Ò»°ãÓÃÀ´´æ·ÅÏñËØÖµ
+    CvScalar color;  //CvScalarå°±æ˜¯ä¸€ä¸ªå¯ä»¥ç”¨æ¥å­˜æ”¾4ä¸ªdoubleæ•°å€¼çš„æ•°ç»„,ä¸€èˆ¬ç”¨æ¥å­˜æ”¾åƒç´ å€¼
     CvRect* regions;
     CvRect* estimate;
 
@@ -44,8 +46,8 @@ int main( int argc, char** argv )
     int i, k, w, h, x, y, pf1, pf2, pf3, border,m;
     int j;
 
-    /*******************Ëæ»úÊıÉú³ÉÆ÷**********************/
-    gsl_rng_env_setup(); //¶ÁÈ¡»·¾³±äÁ¿GSL_RNG_TYPEºÍGSL_RNG_SEEDµÄÖµ£¬²¢°ÑËûÃÇ·Ö±ğ¸³¸øgsl_rng_defaultºÍgsl_rng_default_seed
+    /*******************éšæœºæ•°ç”Ÿæˆå™¨**********************/
+    gsl_rng_env_setup(); //è¯»å–ç¯å¢ƒå˜é‡GSL_RNG_TYPEå’ŒGSL_RNG_SEEDçš„å€¼ï¼Œå¹¶æŠŠä»–ä»¬åˆ†åˆ«èµ‹ç»™gsl_rng_defaultå’Œgsl_rng_default_seed
     rng = gsl_rng_alloc( gsl_rng_mt19937 );
     gsl_rng_set( rng, time(NULL) );
 
@@ -80,7 +82,7 @@ int main( int argc, char** argv )
             frmforp[k]= (IplImage*)cvClone( hsv_frame );
         }
         /* allow user to select object to be tracked in the first frame */
-        if( i == 0 ) //µÚÒ»Ö¡
+        if( i == 0 ) //ç¬¬ä¸€å¸§
         {
             w = frame->width;
             h = frame->height;
@@ -103,10 +105,10 @@ int main( int argc, char** argv )
             }
 
             /* compute reference histograms and distribute particles */
-            ref_histos = compute_ref_histos( hsv_frame, regions, num_objects );  //¼ÆËãÖ±·½Í¼
+            ref_histos = compute_ref_histos( hsv_frame, regions, num_objects );  //è®¡ç®—ç›´æ–¹å›¾
             //if( export1 )
-            //export_ref_histos( ref_histos, num_objects );  //ÊÇ·ñÊä³öÖ±·½Í¼
-            particles = init_distribution( regions, ref_histos, num_objects, num_particles ); //³õÊ¼»¯·Ö²¼Á£×Ó
+            //export_ref_histos( ref_histos, num_objects );  //æ˜¯å¦è¾“å‡ºç›´æ–¹å›¾
+            particles = init_distribution( regions, ref_histos, num_objects, num_particles ); //åˆå§‹åŒ–åˆ†å¸ƒç²’å­
             new_particles = ( particle** )malloc( num_objects * sizeof(particle*) );
             estimate = ( CvRect* )malloc( num_objects * sizeof(CvRect) );
             // particles = ( particle** )malloc( n * sizeof(particle*) );
@@ -123,31 +125,31 @@ int main( int argc, char** argv )
             border = num_objects*num_particles;
 
         }
-        else //Ö®ºóÖ¡
+        else //ä¹‹åå¸§
         {
             gettimeofday(&start,NULL);
             color = CV_RGB(255,255,0);
-            //     const int MIN_ITERATOR_NUM = 1; //¼ÙÉèµ¥Ïß³ÌÑ­»·²»Ğ¡ÓÚ4
-            //     int ncore = omp_get_num_procs(); //»ñÈ¡Ö´ĞĞºËÊıÁ¿
+            //     const int MIN_ITERATOR_NUM = 1; //å‡è®¾å•çº¿ç¨‹å¾ªç¯ä¸å°äº4
+            //     int ncore = omp_get_num_procs(); //è·å–æ‰§è¡Œæ ¸æ•°é‡
             //     int max_tn= num_objects/MIN_ITERATOR_NUM;
-            //     int tn = max_tn>2*ncore ? 2*ncore:max_tn; //ºËÊıÁ¿µÄÁ½±¶ºÍ×î´óĞèÇóÏß³ÌÊıÈ¡½ÏĞ¡Öµ
+            //     int tn = max_tn>2*ncore ? 2*ncore:max_tn; //æ ¸æ•°é‡çš„ä¸¤å€å’Œæœ€å¤§éœ€æ±‚çº¿ç¨‹æ•°å–è¾ƒå°å€¼
             //     #pragma omp parallel for private(j)
 
             /* perform prediction and measurement for each particle */
-            //       #pragma omp parallel //pf1ÎªÂË²¨Æ÷ºÅ£¬jÎªÁ£×ÓºÅ£¬frameNÎª¸÷Ïß³ÌÖ¡¸´ÖÆĞòºÅ
+            //       #pragma omp parallel //pf1ä¸ºæ»¤æ³¢å™¨å·ï¼Œjä¸ºç²’å­å·ï¼ŒframeNä¸ºå„çº¿ç¨‹å¸§å¤åˆ¶åºå·
             //       {
             //       #pragma omp for private(pf1,j)
             for( m = 0; m < border; m++ )
             {
-                pf1 = m >> 7;  //³ıÒÔÁ£×ÓÊı128£¬ÓÃÒÆÎ»´úÌæ³ı·¨½ÚÔ¼Ê±¼ä(ÒÆ¶¯7Î»)
+                pf1 = m >> 7;  //é™¤ä»¥ç²’å­æ•°128ï¼Œç”¨ç§»ä½ä»£æ›¿é™¤æ³•èŠ‚çº¦æ—¶é—´(ç§»åŠ¨7ä½)
                 j = m % num_particles;
                 //fprintf(stderr,"core %d \n",omp_get_num_procs());
                 particles[pf1][j] = transition( particles[pf1][j], w, h, rng ); //paticles transition(w denotes weight,h
                 //denotes height)
                 //fprintf(stderr,"object %d threadnum %d particle %d\n",pf1,omp_get_thread_num(),j);
                 //fprintf(stderr,"s%d = %f\n",pf1,particles[pf1][j].s);
-                //#pragma omp critical //ÁÙ½çÇø£¬ÅÅ¶ÓµÈºò
-                /* ²¢ĞĞÓÃ particles[pf1][j].w = likelihood( frmforp[omp_get_thread_num()], cvRound(particles[pf1][j].y),
+                //#pragma omp critical //ä¸´ç•ŒåŒºï¼Œæ’é˜Ÿç­‰å€™
+                /* å¹¶è¡Œç”¨ particles[pf1][j].w = likelihood( frmforp[omp_get_thread_num()], cvRound(particles[pf1][j].y),
                                                      cvRound( particles[pf1][j].x ),
                                                      cvRound( particles[pf1][j].width * particles[pf1][j].s ),
                                                      cvRound( particles[pf1][j].height * particles[pf1][j].s ),
@@ -165,13 +167,13 @@ int main( int argc, char** argv )
                                                    particles[pf1][j].histo );
                 //fprintf(stderr,"%f\n",particles[pf1][j].w);
                 if( show_all ) //display all particles
-                    display_allparticle( frames[i], particles[pf1][j], color ); //»­µã
+                    display_allparticle( frames[i], particles[pf1][j], color ); //ç”»ç‚¹
             }
             //     #pragma omp for
             for( pf2 = 0; pf2 < num_objects; pf2++)
             {
                 /* normalize weights and resample a set of unweighted particles */
-                normalize_weights( particles[pf2], num_particles );  //¹éÒ»»¯È¨ÖØ
+                normalize_weights( particles[pf2], num_particles );  //å½’ä¸€åŒ–æƒé‡
                 degradation = degradation_estimate( particles[pf2], num_particles );
                 qsort( particles[pf2], num_particles, sizeof( particle ), &particle_cmp );
                 if(degradation <= 2*num_particles/3)
